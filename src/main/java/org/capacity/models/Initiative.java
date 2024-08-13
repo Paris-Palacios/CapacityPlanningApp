@@ -20,4 +20,9 @@ public class Initiative {
     private Project project;
     private LocalDate beginDate;
     private LocalDate endDate;
+
+    public String getCustomerProjectName() {
+        return customer.getCustomerName() +
+                " - " + project.getProjectName();
+    }
 }
