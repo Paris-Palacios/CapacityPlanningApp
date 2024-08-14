@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 public class Utils {
     public static LocalDate convertToLocalDate(Date date) {
+        System.out.println(date);
         if (date == null) {
             return null;
         }

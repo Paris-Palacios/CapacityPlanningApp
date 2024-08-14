@@ -3,7 +3,6 @@ package org.capacity.controllers;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,6 +19,7 @@ import org.capacity.testPackage.ResourcePlanningTableViewModel;
 import org.capacity.utilities.Constants;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -29,6 +29,8 @@ import static org.capacity.utilities.Utils.setCellText;
 
 public class MainController implements Initializable {
     UIService uiService;
+
+    ResourcePlanningTableViewManager resourcePlanningTableViewManager;
 
     @FXML
     private Button btnApply;
@@ -107,7 +109,7 @@ public class MainController implements Initializable {
         Resource selectedResource = tableViewResources.getSelectionModel().getSelectedItems()
                 .stream().findFirst().orElse(null);
         List<ResourcePlanning> resourcePlannings = uiService.getResourcePlanningById(selectedResource.getId());
-        var resourcePlanningTableViewManager = new ResourcePlanningTableViewManager(selectedResource, cmbInitiatives.getSelectionModel().getSelectedItem(), Year.of(yearSelector.getValue()), resourcePlannings);
+        resourcePlanningTableViewManager = new ResourcePlanningTableViewManager(selectedResource, cmbInitiatives.getSelectionModel().getSelectedItem(), Year.of(yearSelector.getValue()), resourcePlannings);
         tableViewResourcePlanning.setItems(FXCollections.observableArrayList(resourcePlanningTableViewManager.getResourcePlanningTableViewModels()));
         tblViewResourcePlanningMonthColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMonth().getMonthName()));
 
@@ -199,7 +201,6 @@ public class MainController implements Initializable {
     @FXML
     void onSave(ActionEvent event) {
         List<ResourcePlanningTableViewModel> resourcePlanning = tableViewResourcePlanning.getItems().stream().toList();
-        
-        System.out.println(tableViewResourcePlanning.getItems().stream().toList());
+        resourcePlanningTableViewManager.saveResourcePlannings(resourcePlanning);
     }
 }

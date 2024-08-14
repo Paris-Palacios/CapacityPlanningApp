@@ -3,6 +3,8 @@ package org.capacity.service;
 import org.capacity.models.*;
 import org.capacity.repository.RepositoryDAO;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.capacity.utilities.Constants.ALL_OPTION;
@@ -47,5 +49,21 @@ public class UIService {
 
     public List<ResourcePlanning> getResourcePlanningById(int resourceId) {
         return databaseManager.executeQuery(repositoryDAO -> repositoryDAO.getResourcePlanningById(resourceId));
+    }
+
+    public void updateResourcePlanningById(ResourcePlanning resourcePlanning) {
+        var id = resourcePlanning.getId();
+        var commited = resourcePlanning.getCommited();
+        var planned = resourcePlanning.getPlanned();
+        databaseManager.createQuery(repositoryDAO -> repositoryDAO.updateResourcePlanningById(id, commited, planned));
+    }
+
+    public void createResourcePlanning(ResourcePlanning resourcePlanning) {
+        var resourceId = resourcePlanning.getResourceId();
+        var commited = resourcePlanning.getCommited();
+        var planned = resourcePlanning.getPlanned();
+        var initiative = resourcePlanning.getInitiativeId();
+        LocalDate date = resourcePlanning.getDate();
+        databaseManager.createQuery(repositoryDAO -> repositoryDAO.insertResourcePlanning(resourceId, date ,commited, planned, initiative));
     }
 }

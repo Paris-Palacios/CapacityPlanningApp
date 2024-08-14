@@ -19,4 +19,5 @@ public class ResourcePlanning {
     private float commited;
     private float planned;
     private float available;
+    private boolean isEmpty;
 }

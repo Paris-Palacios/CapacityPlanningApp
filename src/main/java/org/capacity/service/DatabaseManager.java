@@ -5,6 +5,7 @@ import org.capacity.repository.RepositoryDAO;
 import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class DatabaseManager {
@@ -24,5 +25,9 @@ public class DatabaseManager {
 
     public <T> List<T> executeQuery(Function<RepositoryDAO, List<T>> queryResult) {
         return queryResult.apply(jdbi.onDemand(RepositoryDAO.class));
+    }
+
+    public void createQuery(Consumer<RepositoryDAO> query) {
+        query.accept(jdbi.onDemand(RepositoryDAO.class));
     }
 }

@@ -5,7 +5,10 @@ import org.capacity.models.*;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RepositoryDAO {
@@ -55,5 +58,12 @@ public interface RepositoryDAO {
     @SqlQuery("select * from [initiative planning] WHERE [initiative] = :initiative")
     @RegisterRowMapper(InitiativePlanningMapper.class)
     List<InitiativePlanning> getInitiativePlanningById(@Bind("initiative") int initiativeId);
+
+    @SqlUpdate("UPDATE [Resource Planning] SET [Resource Planning].Commited = :commited, [Resource Planning].Planned = :planned WHERE [Resource Planning].Id = :id;")
+    void updateResourcePlanningById(@Bind("id") int ResourcePlanningId ,@Bind("commited") float ResourcePlanningCommited, @Bind("planned") float ResourcePlanningPlanned);
+
+    @SqlUpdate("INSERT INTO [Resource Planning] (ResourceId, Fecha, Commited, Planned, Initiative) VALUES (:resourceId, :date, :commited, :planned, :initiative)")
+    void insertResourcePlanning(@Bind("resourceId") int ResourceId , @Bind("date") LocalDate date, @Bind("commited") float ResourcePlanningCommited ,
+                                @Bind("planned") float ResourcePlanningPlanned, @Bind("initiative") float initiative);
 
 }
