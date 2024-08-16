@@ -4,6 +4,9 @@ public class Constants {
 
     public static final String APPLICATION_NAME = "Capacity Planning App";
     public static final String ALL_OPTION = "All";
+    public static final String  MAIN = "/Main.fxml";
+    public static final String CONFIG_FILE = "config.properties";
+    public static final String DB_PATH_KEY = "database.path";
     //Table constants
 
     public static final String ID_COLUMN = "id";
@@ -35,7 +38,7 @@ public class Constants {
     //Database constants
 
     public static final String DB_ACCESS_DRIVER = "jdbc:ucanaccess://";
-    public static final String ACCESS_DATABASE_NAME = "database.accdb";
+    public static final String ACCESS_DEFAULT_DATABASE_NAME = "database.accdb";
     public static final String USER_DIR = "user.dir";
 
 }

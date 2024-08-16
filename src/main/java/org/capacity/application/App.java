@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.capacity.service.DatabaseManager;
 import org.capacity.utilities.Constants;
-import org.capacity.utilities.Paths;
 
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         DatabaseManager.getInstance();
-        Parent root = FXMLLoader.load(this.getClass().getResource(Paths.MAIN));
+        Parent root = FXMLLoader.load(this.getClass().getResource(Constants.MAIN));
         Scene scene = new Scene(root);
 
         stage.setScene(scene);

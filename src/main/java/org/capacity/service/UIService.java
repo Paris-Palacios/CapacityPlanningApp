@@ -3,7 +3,6 @@ package org.capacity.service;
 import org.capacity.models.*;
 import org.capacity.repository.RepositoryDAO;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
