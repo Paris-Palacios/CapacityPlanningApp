@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyEvent;
 import javafx.util.converter.FloatStringConverter;
 import org.capacity.models.*;
 import org.capacity.service.ResourcePlanningTableViewManager;
@@ -32,6 +33,12 @@ public class ResourceController implements Initializable {
 
     @FXML
     private Button btnApply;
+
+    @FXML
+    private TextField textFieldSearchResource;
+
+    @FXML
+    private CheckBox otherProjectsCheckBox;
 
     @FXML
     private ComboBox<CostCenter> cmbCostCenters;
@@ -57,6 +64,14 @@ public class ResourceController implements Initializable {
     @FXML
     private TableColumn<ResourcePlanningTableViewModel, Float> plannedColumn;
 
+    @FXML
+    private TableColumn<ResourcePlanningTableViewModel, Float> sumOfCommitedColum;
+
+    @FXML
+    private TableColumn<ResourcePlanningTableViewModel, Float> sumOfPlannedColumn;
+
+    @FXML
+    private TableColumn<ResourcePlanningTableViewModel, String> otherProjectsColumn;
 
     @FXML
     private TableView<Resource> tableViewResources;
@@ -154,6 +169,7 @@ public class ResourceController implements Initializable {
     }
 
     public void listViewResourceFilter() {
+        String search = textFieldSearchResource.getCharacters().toString().toLowerCase();
         var cmbOfficeSelected = cmbOffices.valueProperty().getValue().getOfficeName();
         var cmbCostCenterSelected = cmbCostCenters.valueProperty().getValue().getCostCenterName();
 
@@ -161,8 +177,10 @@ public class ResourceController implements Initializable {
                 .getOffice().getOfficeName().equals(cmbOfficeSelected);
         Predicate<Resource> costCenterPredicate = resource -> cmbCostCenterSelected.equals(Constants.ALL_OPTION) || resource
                 .getCostCenter().getCostCenterName().equals(cmbCostCenterSelected);
+        Predicate<Resource> searchResourcePredicate = resource -> search.trim().isEmpty() || resource.getResourceName()
+                .toLowerCase().contains(search);
 
-        filteredResourcesList.setPredicate(resource -> costCenterPredicate.and(officePredicate).test(resource));
+        filteredResourcesList.setPredicate(resource -> costCenterPredicate.and(officePredicate).and(searchResourcePredicate).test(resource));
     }
 
     public void setTableViewResourcePlanning() {
@@ -188,6 +206,11 @@ public class ResourceController implements Initializable {
             ResourcePlanningTableViewModel resource = event.getRowValue();
             resource.getMonthAndSelectedInitiativeResourcePlanning().setPlanned(event.getNewValue());
         });
+
+        sumOfCommitedColum.setCellValueFactory(cellData -> new SimpleFloatProperty(cellData.getValue()
+                .getOtherProjects().getSumOfCommited()).asObject());
+        sumOfPlannedColumn.setCellValueFactory(cellData -> new SimpleFloatProperty(cellData.getValue()
+                .getOtherProjects().getSumOfPlanned()).asObject());
     }
 
     @FXML
@@ -198,6 +221,30 @@ public class ResourceController implements Initializable {
 
     @FXML
     void onSave(ActionEvent event) {
-        resourcePlanningTableViewManager.saveResourcePlannings(tableViewResourcePlanning.getItems().stream().toList());
+        try {
+            resourcePlanningTableViewManager.saveResourcePlannings(tableViewResourcePlanning.getItems().stream().toList());
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Save Confirmation");
+            alert.setHeaderText(null);
+            alert.setContentText("Changes have been saved successfully!");
+            alert.showAndWait();
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("An error occurred when trying to save, please try again");
+            alert.showAndWait();
+        }
+
+    }
+
+    @FXML
+    void onKeyTyped(KeyEvent event) {
+        listViewResourceFilter();
+    }
+
+    @FXML
+    void onShowOtherProjects(ActionEvent event) {
+        otherProjectsColumn.setVisible(otherProjectsCheckBox.isSelected());
     }
 }

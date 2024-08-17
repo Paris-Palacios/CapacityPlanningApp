@@ -2,10 +2,7 @@ package org.capacity.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.capacity.models.Initiative;
-import org.capacity.models.Resource;
-import org.capacity.models.ResourcePlanning;
-import org.capacity.models.ResourcePlanningTableViewModel;
+import org.capacity.models.*;
 import org.capacity.utilities.Months;
 
 import java.time.LocalDate;
@@ -22,6 +19,7 @@ public class ResourcePlanningTableViewManager {
     private Year year;
     private Resource resource;
     private List<ResourcePlanning> resourcePlanningsByYearAndInitiative;
+    private List<ResourcePlanning> resourcePlannings;
     private List<Months> monthsList = Arrays.stream(Months.values()).toList();
     private List<ResourcePlanningTableViewModel> resourcePlanningTableViewModels;
 
@@ -29,21 +27,33 @@ public class ResourcePlanningTableViewManager {
         this.initiative = initiative;
         this.year = year;
         this.resource = resource;
-        this.resourcePlanningsByYearAndInitiative = filterByYearAndInitiative(resourcePlanning);
+        this.resourcePlannings = resourcePlanning;
         this.uiService = UIService.getInstance();
     }
     //List<ResourcePlanningTableViewModel> will be used as the model that UI would display
     public List<ResourcePlanningTableViewModel> getResourcePlanningTableViewModels() {
         resourcePlanningTableViewModels = new ArrayList<>();
         monthsList.forEach(month -> {
-            var resourcePlanningFilteredByMonth = resourcePlanningsByYearAndInitiative.stream()
-                    .filter(resourcePlanning -> resourcePlanning.getDate().getMonth().getValue() == month.getMonth().getValue()).toList();
+            var resourcePlanningFilteredByInitiative = filterByYearAndMonth(resourcePlannings, month)
+                    .stream().filter(rp -> rp.getInitiativeId() == getInitiative().getId()).toList();
 
-            if (!resourcePlanningFilteredByMonth.isEmpty()) {
-                var resourcePlanning = resourcePlanningFilteredByMonth.get(0);
+            var resourcePlanningFilteredByOtherProjects = filterByYearAndMonth(resourcePlannings, month)
+                    .stream().filter(rp -> rp.getInitiativeId() != getInitiative().getId()).toList();
+
+            float sumOfCommittedOtherProjects = resourcePlanningFilteredByOtherProjects
+                    .stream().map(ResourcePlanning::getCommited).reduce(Float::sum).orElse(0f);
+            float sumOfPlannedOtherProjects = resourcePlanningFilteredByOtherProjects
+                    .stream().map(ResourcePlanning::getPlanned).reduce(Float::sum).orElse(0f);
+
+            if (!resourcePlanningFilteredByInitiative.isEmpty()) {
+                var resourcePlanning = resourcePlanningFilteredByInitiative.get(0);
                 resourcePlanningTableViewModels.add(ResourcePlanningTableViewModel.builder()
                         .month(month)
                         .monthAndSelectedInitiativeResourcePlanning(resourcePlanning)
+                        .otherProjects(OtherProjects.builder()
+                                .sumOfCommited(sumOfCommittedOtherProjects)
+                                .sumOfPlanned(sumOfPlannedOtherProjects)
+                                .build())
                         .build());
             }
             else {
@@ -52,13 +62,18 @@ public class ResourcePlanningTableViewManager {
                         .monthAndSelectedInitiativeResourcePlanning(ResourcePlanning.builder()
                                 .isEmpty(true)
                                 .build())
+                        .otherProjects(OtherProjects.builder()
+                                .sumOfCommited(sumOfCommittedOtherProjects)
+                                .sumOfPlanned(sumOfPlannedOtherProjects)
+                                .build())
                         .build());
             }
                 });
+
         return resourcePlanningTableViewModels;
     }
 
-    public void saveResourcePlannings(List<ResourcePlanningTableViewModel> resourcePlannings) {
+    public void saveResourcePlannings(List<ResourcePlanningTableViewModel> resourcePlannings) throws Exception {
         resourcePlannings
                 .forEach(resourcePlanningTableViewModel -> {
                     ResourcePlanning resourcePlanning = resourcePlanningTableViewModel.getMonthAndSelectedInitiativeResourcePlanning();
@@ -82,9 +97,11 @@ public class ResourcePlanningTableViewManager {
                 });
     }
 
-    private List<ResourcePlanning> filterByYearAndInitiative(List<ResourcePlanning> resourcePlanning) {
+    private List<ResourcePlanning> filterByYearAndMonth(List<ResourcePlanning> resourcePlanning, Months month) {
         return resourcePlanning.stream()
                 .filter(rp -> rp.getDate().getYear() == getYear().getValue() &&
-                        rp.getInitiativeId() == getInitiative().getId()).toList();
+                        rp.getDate().getMonth().getValue() == month.getMonth().getValue()
+                )
+                .toList();
     }
 }

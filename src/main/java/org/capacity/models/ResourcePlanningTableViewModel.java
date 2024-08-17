@@ -10,4 +10,5 @@ import org.capacity.utilities.Months;
 public class ResourcePlanningTableViewModel {
     private Months month;
     private ResourcePlanning monthAndSelectedInitiativeResourcePlanning;
+    private OtherProjects otherProjects;
 }
